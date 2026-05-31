@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-
+use Illuminate\Support\Facades\URL; // Обов'язково додай цей рядок зверху!
 class AppServiceProvider extends ServiceProvider
 {
     /**
