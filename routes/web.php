@@ -151,5 +151,39 @@ Route::get('/clear-cache-secret-123', function () {
 });
 Route::get('/dashboard', [\App\Http\Controllers\PassengerController::class, 'index'])->name('dashboard');
 
+
+
+Route::get('/seed-my-database-789', function () {
+    try {
+        // Запускаємо головний сидер проєкту
+        Artisan::call('db:seed', ['--force' => true]);
+        
+        return 'Базу даних успішно заповнено тестовими містами, рейсами та літаками!';
+    } catch (\Exception $e) {
+        return 'Помилка заповнення бази: ' . $e->getMessage();
+    }
+});
+Route::get('/create-admin-xyz', function () {
+    try {
+        // Перевіряємо, чи немає вже адміна з такою поштою, щоб не було дублів
+        $adminExists = User::where('email', 'admin@avia.com')->exists();
+        
+        if ($adminExists) {
+            return 'Адмін з такою поштою вже існує в системі!';
+        }
+
+        // Створюємо користувача
+        $admin = User::create([
+            'name' => 'Головний Адміністратор',
+            'email' => 'admin@avia.com',
+            'password' => Hash::make('SuperSecretPassword123'), // Твій пароль для входу
+            'role' => 'admin', // Або та логіка ролей, яку ти використовуєш
+        ]);
+
+        return 'Адміна успішно створено! Логін: admin@avia.com, Пароль: SuperSecretPassword123';
+    } catch (\Exception $e) {
+        return 'Помилка створення адміна: ' . $e->getMessage();
+    }
+});
 // Підключаємо маршрути автентифікації від Breeze (Login, Register, Logout)
 require __DIR__.'/auth.php';
