@@ -126,14 +126,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
 Route::get('/run-migrations-secret-123', function () {
     try {
-        Artisan::call('migrate', ['--force' => true]);
-        return 'Міграції успішно запущені! База даних готова.';
+        // Команда fresh ОБОВ'ЯЗКОВО видалить стару таблицю users і створить її заново
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        return 'Базу даних повністю очищено та успішно перестворено з нуля!';
     } catch (\Exception $e) {
         return 'Помилка міграції: ' . $e->getMessage();
     }
 });
+
+
 Route::get('/clear-cache-secret-123', function () {
     try {
         Artisan::call('config:clear');
