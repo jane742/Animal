@@ -96,7 +96,9 @@ Route::patch('/admin/schedules/{id}/update-price', [AdminController::class, 'upd
 // ==========================================
 // 🧳 КАБІНЕТ ПАСАЖИРА (Захищений)
 // ==========================================
-
+Route::middleware(['auth', 'role:passenger'])->group(function () {
+    // Головна сторінка кабінету (тепер відкриває метод index нашого контролера)
+    
     
 // Маршрут для фінального збереження квитків усіх пасажирів
 Route::post('/dashboard/booking/{booking_id}/store-tickets', [\App\Http\Controllers\PassengerController::class, 'storeTickets'])->name('passenger.save_tickets');
@@ -127,14 +129,9 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/run-migrations-secret-123', function () {
     try {
-        // 1. Примусово видаляємо абсолютно ВСІ таблиці та зв'язки в PostgreSQL начисто
-        DB::statement('DROP SCHEMA public CASCADE;');
-        DB::statement('CREATE SCHEMA public;');
-        
-        // 2. Накатуємо міграції на абсолютно порожню базу
-        Artisan::call('migrate', ['--force' => true]);
-        
-        return 'Базу даних PostgreSQL повністю очищено від старих зв’язків та успішно перестворено з нуля!';
+        // Команда fresh ОБОВ'ЯЗКОВО видалить стару таблицю users і створить її заново
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        return 'Базу даних повністю очищено та успішно перестворено з нуля!';
     } catch (\Exception $e) {
         return 'Помилка міграції: ' . $e->getMessage();
     }
@@ -152,10 +149,7 @@ Route::get('/clear-cache-secret-123', function () {
         return 'Помилка очищення кешу: ' . $e->getMessage();
     }
 });
-
-Route::middleware(['auth', 'role:passenger'])->group(function () {
-    // Головна сторінка кабінету (тепер відкриває метод index нашого контролера)
-    Route::get('/dashboard', [\App\Http\Controllers\PassengerController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\PassengerController::class, 'index'])->name('dashboard');
 
 // Підключаємо маршрути автентифікації від Breeze (Login, Register, Logout)
 require __DIR__.'/auth.php';
