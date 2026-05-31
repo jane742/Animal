@@ -1,23 +1,26 @@
-# Використовуємо офіційний образ PHP з Apache
+# === ЕТАП 1: Збірка фронтенду (Node) ===
+FROM node:18-alpine AS frontend-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# === ЕТАП 2: Основний сервер (PHP + Apache) ===
 FROM php:8.2-apache
 
-# Встановлюємо системні залежності та інструменти
+# Встановлюємо системні залежності для PostgreSQL
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     git \
     unzip \
     zip \
-    curl \
     && docker-php-ext-install pdo pdo_pgsql
 
-# ВСТАНОВЛЮЄМО NODE.JS ТА NPM (чиста та правильна команда)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y pedestrian nodejs
-
-# Встановлюємо Composer прямо всередину контейнера
+# Встановлюємо Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Увімкнення модуля Apache rewrite для маршрутизації
+# Увімкнення модуля Apache rewrite
 RUN a2enmod rewrite
 
 # Налаштування кореневої папки Apache на public
@@ -29,14 +32,13 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 COPY . /var/www/html
 WORKDIR /var/www/html
 
-# Запускаємо встановлення PHP пакетів
+# Запускаємо встановлення PHP пакетів Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Запускаємо збірку фронтенду через Vite
-RUN npm install && npm run build
+# МАГІЯ: Копіюємо вже скомпілений фронтенд з першого етапу (виправляє помилку Vite)
+COPY --from=frontend-builder /app/public/build /var/www/html/public/build
 
-# Виставляємо правильні права доступу
+# Виставляємо права доступу
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Відкриваємо порт
 EXPOSE 80
