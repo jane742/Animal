@@ -180,10 +180,80 @@ Route::get('/create-admin-xyz', function () {
             'role' => 'admin', // Або та логіка ролей, яку ти використовуєш
         ]);
 
-        return 'Адміна успішно створено! Логін: admin@avia.com, Пароль: SuperSecretPassword123';
+        return 'Адміна успішно створено! Логін: admin@avia.com, Пароль:11111111';
     } catch (\Exception $e) {
         return 'Помилка створення адміна: ' . $e->getMessage();
     }
 });
+
+
+Route::get('/setup-shop-789', function () {
+    try {
+        // 1. СТВОРЮЄМО АДМІНА (якщо його ще немає)
+        $adminEmail = 'admin@avia.com';
+        $admin = User::where('email', $adminEmail)->first();
+        
+        if (!$admin) {
+            User::create([
+                'name' => 'Головний Адміністратор',
+                'email' => $adminEmail,
+                'password' => Hash::make('SuperSecretPassword123'),
+                'role' => 'admin', 
+            ]);
+            $adminStatus = "Адміна ($adminEmail) створено!";
+        } else {
+            $adminStatus = "Адмін вже існував.";
+        }
+
+        // 2. ЗАПОВНЮЄМО МІСТА ТА РЕЙСИ
+        // Перевіряємо, чи є таблиця 'cities' (або як вона у тебе називається в міграціях)
+        // Якщо твої таблиці називаються інакше, просто підправ назви 'cities' та 'flights' / 'flight_schedules'
+        
+        // Приклад ручного вставлення через DB-фасад, щоб не прив'язуватися до моделей
+        if (DB::table('cities')->count() == 0) {
+            DB::table('cities')->insert([
+                ['id' => 1, 'name' => 'Київ', 'created_at' => now(), 'updated_at' => now()],
+                ['id' => 2, 'name' => 'Львів', 'created_at' => now(), 'updated_at' => now()],
+                ['id' => 3, 'name' => 'Одеса', 'created_at' => now(), 'updated_at' => now()],
+            ]);
+            $citiesStatus = "Міста додано!";
+        } else {
+            $citiesStatus = "Міста вже були в базі.";
+        }
+
+        // Заповнюємо розклад рейсів (підстав свої назви колонок, якщо вони відрізняються)
+        if (DB::table('flight_schedules')->count() == 0) {
+            DB::table('flight_schedules')->insert([
+                [
+                    'flight_number' => 'PS-101',
+                    'departure_city_id' => 1, // Київ
+                    'arrival_city_id' => 2,   // Львів
+                    'departure_time' => Carbon::now()->addHours(5), // Виліт через 5 годин (якраз підпаде під наш новий фільтр < 24 год)
+                    'price' => 1500,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ],
+                [
+                    'flight_number' => 'PS-202',
+                    'departure_city_id' => 2, // Львів
+                    'arrival_city_id' => 3,   // Одеса
+                    'departure_time' => Carbon::now()->addDays(2), // Виліт через 2 дні
+                    'price' => 1800,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            ]);
+            $flightsStatus = "Тестові рейси додано!";
+        } else {
+            $flightsStatus = "Рейси вже були в базі.";
+        }
+
+        return "Успіх! <br> 1. $adminStatus <br> 2. $citiesStatus <br> 3. $flightsStatus";
+
+    } catch (\Exception $e) {
+        return 'Помилка налаштування бази: ' . $e->getMessage();
+    }
+});
+
 // Підключаємо маршрути автентифікації від Breeze (Login, Register, Logout)
 require __DIR__.'/auth.php';
