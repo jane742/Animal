@@ -96,9 +96,7 @@ Route::patch('/admin/schedules/{id}/update-price', [AdminController::class, 'upd
 // ==========================================
 // 🧳 КАБІНЕТ ПАСАЖИРА (Захищений)
 // ==========================================
-Route::middleware(['auth', 'role:passenger'])->group(function () {
-    // Головна сторінка кабінету (тепер відкриває метод index нашого контролера)
-    Route::get('/dashboard', [\App\Http\Controllers\PassengerController::class, 'index'])->name('dashboard');
+
     
 // Маршрут для фінального збереження квитків усіх пасажирів
 Route::post('/dashboard/booking/{booking_id}/store-tickets', [\App\Http\Controllers\PassengerController::class, 'storeTickets'])->name('passenger.save_tickets');
@@ -149,6 +147,10 @@ Route::get('/clear-cache-secret-123', function () {
         return 'Помилка очищення кешу: ' . $e->getMessage();
     }
 });
+
+Route::middleware(['auth', 'role:passenger'])->group(function () {
+    // Головна сторінка кабінету (тепер відкриває метод index нашого контролера)
+    Route::get('/dashboard', [\App\Http\Controllers\PassengerController::class, 'index'])->name('dashboard');
 
 // Підключаємо маршрути автентифікації від Breeze (Login, Register, Logout)
 require __DIR__.'/auth.php';
