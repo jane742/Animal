@@ -1,24 +1,36 @@
-# Використовуємо офіційний образ PHP з Apache, оптимізований під Laravel
+# Використовуємо офіційний образ PHP з Apache
 FROM php:8.2-apache
 
-# Встановлюємо необхідні системні розширення для роботи бази даних PostgreSQL
+# Встановлюємо системні залежності та інструменти (включаючи git та zip для Composer)
 RUN apt-get update && apt-get install -y \
     libpq-dev \
+    git \
+    unzip \
+    zip \
     && docker-php-ext-install pdo pdo_pgsql
 
-# Увімкнення модуля Apache rewrite для правильної маршрутизації Laravel (routes)
+# Встановлюємо Composer прямо всередину контейнера
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Увімкнення модуля Apache rewrite для маршрутизації Laravel
 RUN a2enmod rewrite
 
-# Змінюємо кореневу папку Apache на public, як того вимагає Laravel
+# Налаштування кореневої папки Apache на public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
-# Копіюємо всі файли нашого проєкту в контейнер
+# Копіюємо файли проєкту в контейнер
 COPY . /var/www/html
 
-# Встановлюємо правильні права доступу для папок кешу та логів
+# Встановлюємо робочу директорію
+WORKDIR /var/www/html
+
+# ЗАПУСКАЄМО ВСТАНОВЛЕННЯ ПАКЕТІВ LARAVEL (виправляє твою помилку)
+RUN composer install --no-dev --optimize-autoloader
+
+# Виставляємо правильні права доступу
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Відкриваємо порт для Render
+# Відкриваємо порт
 EXPOSE 80
