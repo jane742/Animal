@@ -126,6 +126,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+Route::get('/run-migrations-secret-123', function () {
+    try {
+        Artisan::call('migrate', ['--force' => true]);
+        return 'Міграції успішно запущені! База даних готова.';
+    } catch (\Exception $e) {
+        return 'Помилка міграції: ' . $e->getMessage();
+    }
+});
 
 // Підключаємо маршрути автентифікації від Breeze (Login, Register, Logout)
 require __DIR__.'/auth.php';
