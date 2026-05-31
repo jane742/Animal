@@ -127,9 +127,14 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/run-migrations-secret-123', function () {
     try {
-        // Команда fresh ОБОВ'ЯЗКОВО видалить стару таблицю users і створить її заново
-        Artisan::call('migrate:fresh', ['--force' => true]);
-        return 'Базу даних повністю очищено та успішно перестворено з нуля!';
+        // 1. Примусово видаляємо абсолютно ВСІ таблиці та зв'язки в PostgreSQL начисто
+        DB::statement('DROP SCHEMA public CASCADE;');
+        DB::statement('CREATE SCHEMA public;');
+        
+        // 2. Накатуємо міграції на абсолютно порожню базу
+        Artisan::call('migrate', ['--force' => true]);
+        
+        return 'Базу даних PostgreSQL повністю очищено від старих зв’язків та успішно перестворено з нуля!';
     } catch (\Exception $e) {
         return 'Помилка міграції: ' . $e->getMessage();
     }
