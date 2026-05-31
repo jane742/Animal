@@ -126,12 +126,17 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-Route::get('/run-migrations-secret-123', function () {
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/clear-cache-secret-123', function () {
     try {
-        Artisan::call('migrate', ['--force' => true]);
-        return 'Міграції успішно запущені! База даних готова.';
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('view:clear');
+        Artisan::call('route:clear');
+        return 'Кеш успішно очищено! Перевіряйте головну сторінку.';
     } catch (\Exception $e) {
-        return 'Помилка міграції: ' . $e->getMessage();
+        return 'Помилка очищення кешу: ' . $e->getMessage();
     }
 });
 
