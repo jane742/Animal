@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-
+use Carbon\Carbon;
 
 class PassengerController extends Controller
 {
@@ -16,12 +16,13 @@ class PassengerController extends Controller
 public function index(Request $request)
 {
     $userId = Auth::id();
-
+$now = Carbon::now();
+$in24Hours = Carbon::now()->addHours(24);
     // 1. Авто-скасування протермінованих броней (< 24 годин до вильоту)
     $expiredBookings = DB::table('bookings')
         ->join('flight_schedules', 'bookings.flight_schedule_id', '=', 'flight_schedules.id')
         ->where('bookings.status', '=', 'pending')
-        ->whereRaw('TIMESTAMPDIFF(HOUR, NOW(), flight_schedules.departure_time) < 24')
+     ->whereBetween('flight_schedules.departure_time', [$now, $in24Hours])
         ->pluck('bookings.id')
         ->toArray();
 
