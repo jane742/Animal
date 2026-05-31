@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('flight_schedules', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('flight_id')->index('flight_id');
-            $table->unsignedBigInteger('airplane_id')->index('airplane_id');
-            $table->dateTime('departure_time')->index('idx_schedules_time');
+            $table->unsignedBigInteger('flight_id')->index();
+            $table->unsignedBigInteger('airplane_id')->index();
+            $table->dateTime('departure_time')->index();
             $table->dateTime('arrival_time');
             $table->decimal('base_price');
             $table->enum('status', ['scheduled', 'delayed', 'departed', 'arrived', 'cancelled'])->default('scheduled');

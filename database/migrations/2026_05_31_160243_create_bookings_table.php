@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->index('user_id');
-            $table->unsignedBigInteger('flight_schedule_id')->index('flight_schedule_id');
+            $table->unsignedBigInteger('user_id')->index();
+            $table->unsignedBigInteger('flight_schedule_id')->index();
             $table->decimal('total_price')->nullable();
             $table->enum('status', ['pending', 'paid', 'cancelled'])->default('pending');
             $table->timestamp('created_at')->nullable()->useCurrent();

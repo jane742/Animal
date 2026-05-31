@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('tickets', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('booking_id')->index('booking_id');
-            $table->unsignedBigInteger('seat_id')->index('seat_id');
+            $table->unsignedBigInteger('booking_id')->index();
+            $table->unsignedBigInteger('seat_id')->index();
             $table->string('passenger_name');
             $table->string('passport_number', 100);
             $table->string('ticket_code')->unique();

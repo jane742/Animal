@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('seats', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('airplane_id')->index('airplane_id');
+           $table->unsignedBigInteger('airplane_id')->index();
             $table->string('seat_number', 10);
             $table->enum('class', ['economy', 'business', 'first'])->default('economy');
             $table->timestamp('created_at')->nullable()->useCurrent();
