@@ -10,9 +10,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     && docker-php-ext-install pdo pdo_pgsql
 
-# ВСТАНОВЛЮЄМО NODE.JS ТА NPM (необхідно для Vite)
+# ВСТАНОВЛЮЄМО NODE.JS ТА NPM (чиста та правильна команда)
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y rigging nodejs
+    && apt-get install -y pedestrian nodejs
 
 # Встановлюємо Composer прямо всередину контейнера
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -32,7 +32,7 @@ WORKDIR /var/www/html
 # Запускаємо встановлення PHP пакетів
 RUN composer install --no-dev --optimize-autoloader
 
-# ЗАПУСКАЄМО СБОРКУ ФРОНТЕНДУ ЧЕРЕЗ VITE (виправляє твою помилку)
+# Запускаємо збірку фронтенду через Vite
 RUN npm install && npm run build
 
 # Виставляємо правильні права доступу
